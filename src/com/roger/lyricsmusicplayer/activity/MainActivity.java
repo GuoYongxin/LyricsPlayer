@@ -7,6 +7,7 @@ import java.util.Formatter;
 import java.util.Locale;
 
 import android.app.Activity;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.MediaPlayer.OnPreparedListener;
 import android.os.Bundle;
@@ -20,13 +21,18 @@ import android.widget.TextView;
 
 import com.roger.lyricsmusicplayer.lyrics.DefaultLrcBuilder;
 import com.roger.lyricsmusicplayer.lyrics.ILrcBuilder;
+import com.roger.lyricsmusicplayer.lyrics.LrcDownloader;
+import com.roger.lyricsmusicplayer.lyrics.LrcDownloader.LrcDownloaderHook;
 import com.roger.lyricsmusicplayer.lyrics.LrcRow;
 import com.roger.lyricsmusicplayer.lyrics.LrcView;
 import com.sony.lyricsmusicplayer.R;
 
-public class MainActivity extends Activity implements MediaPlayerControl, OnPreparedListener {
+public class MainActivity extends Activity
+		implements
+			MediaPlayerControl,
+			OnPreparedListener {
 	public static final String TAG = "MainActivity";
-//	public static final String FILE = "High Voltage";
+	// public static final String FILE = "High Voltage";
 	public static final String FILE = "Music";
 	public static final int TIME_MSG = 1;
 	MediaPlayer mPlayer;
@@ -43,12 +49,13 @@ public class MainActivity extends Activity implements MediaPlayerControl, OnPrep
 		public void handleMessage(Message msg) {
 			super.handleMessage(msg);
 			switch (msg.what) {
-				case TIME_MSG:
+				case TIME_MSG :
 					int currentTime = msg.arg1;
-					mCurrentTimeText.setText("CurrentTime: " + currentTime + " " + stringForTime(currentTime));
+					mCurrentTimeText.setText("CurrentTime: " + currentTime
+							+ " " + stringForTime(currentTime));
 					mLrcView.seekToTime(currentTime);
 					break;
-				default:
+				default :
 
 			}
 		}
@@ -69,25 +76,28 @@ public class MainActivity extends Activity implements MediaPlayerControl, OnPrep
 	}
 
 	private void initThread() {
-//		mThread = new TimerThread();
+		// mThread = new TimerThread();
 	}
 
 	private void initMediaPlayer() {
 		mPlayer = new MediaPlayer();
+		mPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
 		mPlayer.setOnPreparedListener(this);
 		mController = new MediaController(this);
 		try {
-//			String path = "http://zhangmenshiting.baidu.com/data2/music/42302589/42302589.mp3?xcode=fcf003463c29f1166ef3bc28f358a6c80a3ef7cf1810f3a7";
-			mPlayer.setDataSource(getAssets().openFd(FILE + ".mp3").getFileDescriptor());
-//			path = "http://mod.cri.cn/eng/features/pik/2013/08/0807pik.mp3";
-//			mPlayer.setDataSource(path);
-			
+			String path = "http://zhangmenshiting.baidu.com/data2/music/35510639/1055422913320024.mp3?xcode=9a93517bc1237a7383725d738a5cb951a9a6b9374078f988";
+			// mPlayer.setDataSource(getAssets().openFd(FILE + ".mp3")
+			// .getFileDescriptor());
+			// path = "http://mod.cri.cn/eng/features/pik/2013/08/0807pik.mp3";
+			mPlayer.setDataSource(path.trim());
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		try {
 			mPlayer.prepare();
-			String duration = "Duration: " + mPlayer.getDuration() + "  " + stringForTime(mPlayer.getDuration());
+			String duration = "Duration: " + mPlayer.getDuration() + "  "
+					+ stringForTime(mPlayer.getDuration());
 			mDurationText.setText(duration);
 			Log.v(TAG, duration);
 		} catch (Exception e) {
@@ -96,20 +106,45 @@ public class MainActivity extends Activity implements MediaPlayerControl, OnPrep
 	}
 
 	private void initLyrics() {
-		String lrc = getFromAssets(FILE + ".lrc");
-		ILrcBuilder builder = new DefaultLrcBuilder();
-		ArrayList<LrcRow> rows = builder.getLrcRows(lrc);
-		mLrcView.setLrcAll(rows);
+		// String lrc = getFromAssets(FILE + ".lrc");
+		String url = "http://music.baidu.com/data2/lrc/23362117/23362117.lrc";
+		final LrcDownloader dl = new LrcDownloader(url,
+				new LrcDownloaderHook() {
+
+					@Override
+					public void onSuccess(String content) {
+						ILrcBuilder builder = new DefaultLrcBuilder();
+						ArrayList<LrcRow> rows = builder.getLrcRows(content);
+						mLrcView.setLrcAll(rows);
+						mLrcView.invalidate();
+					}
+
+					@Override
+					public void onFail() {
+
+					}
+				}, handler);
+		new Thread() {
+
+			@Override
+			public void run() {
+				dl.startDownLoad();
+			}
+
+		}.start();
+
 	}
 
 	private String getFromAssets(String fileName) {
 		try {
-			InputStreamReader inputReader = new InputStreamReader(getResources().getAssets().open(fileName));
+			InputStreamReader inputReader = new InputStreamReader(
+					getResources().getAssets().open(fileName));
 			BufferedReader bufReader = new BufferedReader(inputReader);
 			String line = "";
 			String Result = "";
 			while ((line = bufReader.readLine()) != null) {
-				if (line.trim().equals("")) continue;
+				if (line.trim().equals(""))
+					continue;
 				Result += line + "\r\n";
 			}
 			return Result;
@@ -121,7 +156,8 @@ public class MainActivity extends Activity implements MediaPlayerControl, OnPrep
 
 	private String stringForTime(int timeMs) {
 		StringBuilder mFormatBuilder = new StringBuilder();
-		Formatter mFormatter = new Formatter(mFormatBuilder, Locale.getDefault());
+		Formatter mFormatter = new Formatter(mFormatBuilder,
+				Locale.getDefault());
 		int totalSeconds = timeMs / 1000;
 
 		int seconds = totalSeconds % 60;
@@ -130,7 +166,8 @@ public class MainActivity extends Activity implements MediaPlayerControl, OnPrep
 
 		mFormatBuilder.setLength(0);
 		if (hours > 0) {
-			return mFormatter.format("%d:%02d:%02d", hours, minutes, seconds).toString();
+			return mFormatter.format("%d:%02d:%02d", hours, minutes, seconds)
+					.toString();
 		} else {
 			return mFormatter.format("%02d:%02d", minutes, seconds).toString();
 		}
@@ -138,16 +175,17 @@ public class MainActivity extends Activity implements MediaPlayerControl, OnPrep
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		//the MediaController will hide after 3 seconds - tap the screen to make it appear again
+		// the MediaController will hide after 3 seconds - tap the screen to
+		// make it appear again
 		mController.show();
 		return false;
 	}
 
-	//MediaControl
+	// MediaControl
 	@Override
 	public void start() {
 		mPlayer.start();
-//		if (mThread == null) 
+		// if (mThread == null)
 		mThread = new TimerThread();
 		mThread.start();
 	}
@@ -160,7 +198,7 @@ public class MainActivity extends Activity implements MediaPlayerControl, OnPrep
 
 	@Override
 	public int getDuration() {
-//		System.out.println(mPlayer.getDuration());
+		// System.out.println(mPlayer.getDuration());
 		return mPlayer.getDuration();
 	}
 
@@ -183,7 +221,8 @@ public class MainActivity extends Activity implements MediaPlayerControl, OnPrep
 
 	@Override
 	public int getBufferPercentage() {
-		return (mPlayer.getCurrentPosition() * 100) / mPlayer.getDuration();
+		return ((mPlayer.getCurrentPosition() + 20) * 100)
+				/ mPlayer.getDuration();
 	}
 
 	@Override
@@ -204,7 +243,7 @@ public class MainActivity extends Activity implements MediaPlayerControl, OnPrep
 		return true;
 	}
 
-	//onPrepare
+	// onPrepare
 	@Override
 	public void onPrepared(MediaPlayer mp) {
 		Log.d(TAG, "onPrepared");

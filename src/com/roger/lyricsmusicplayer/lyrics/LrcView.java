@@ -22,10 +22,10 @@ public class LrcView extends View {
 	private Paint mPaint;
 	private int mFontSize = 26;
 	private int mPaddingY = 10;
-	// private int mPaddingX = 0;
 	private int mHighLightColor = Color.YELLOW;
 	private int mNormalColor = Color.BLACK;
 
+	private final String NO_LRC = "No Lrc right row";
 	public LrcView(Context context, AttributeSet attr) {
 		super(context, attr);
 		mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -34,16 +34,21 @@ public class LrcView extends View {
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		if (mLrcAll == null || mLrcAll.size() == 0) {
-			Log.v(TAG, "noLrc");
-			return;
-		}
 		int height = getHeight();
 		int width = getWidth();
 
 		final int rowX = width / 2;
 		int rowY;
 		int row;
+		if (mLrcAll == null || mLrcAll.size() == 0) {
+			Log.v(TAG, "noLrc");
+			int y = height / 2 - mFontSize;
+			mPaint.setTextAlign(Align.CENTER);
+			mPaint.setColor(mHighLightColor);
+			canvas.drawText(NO_LRC, rowX, y, mPaint);
+			return;
+
+		}
 
 		// draw highlight row
 		int highlightRowY = height / 2 - mFontSize;
@@ -75,7 +80,7 @@ public class LrcView extends View {
 		super.onDraw(canvas);
 	}
 
-	public void seekToRow(int pos) {
+	private  void seekToRow(int pos) {
 		if (pos == mCurrentRow)
 			return;
 		mCurrentRow = pos;
@@ -85,7 +90,7 @@ public class LrcView extends View {
 	}
 
 	public void seekToTime(long milliSec) {
-		if (mLrcAll == null)
+		if (mLrcAll == null || mLrcAll.size() == 0)
 			return;
 		int low = 0;
 		int high = mLrcAll.size() - 1;
