@@ -43,7 +43,6 @@ public class LrcDownloader {
 				builder.append(line + "\n");
 			}
 			final String content = builder.toString();
-			System.out.println(content);
 			if (content != null && content.length() > 0) {
 				if (mHandler != null) {
 					mHandler.post(new Runnable() {
@@ -60,18 +59,25 @@ public class LrcDownloader {
 			br.close();
 			connection.disconnect();
 
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		} catch (final Exception e) {
+			hook.onFail(e);
+			if (mHandler != null) {
+				mHandler.post(new Runnable() {
+
+					@Override
+					public void run() {
+						hook.onFail(e);
+					}
+				});
+			} else {
+				hook.onFail(e);
+			}
+		} 
 	}
 
 	public interface LrcDownloaderHook {
 		public void onSuccess(String content);
 
-		public void onFail();
+		public void onFail(Exception e);
 	}
 }

@@ -6,16 +6,11 @@
     android:gravity="center"
     android:orientation="vertical"
     tools:context=".MainActivity" >
-    <EditText
-        android:id="@+id/s"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="http://zhangmenshiting.baidu.com/data2/music/42302589/42302589.mp3?xcode=fcf003463c29f1166ef3bc28f358a6c80a3ef7cf1810f3a7" 
-        />
+
 
     <com.roger.lyricsmusicplayer.lyrics.LrcView
         android:id="@+id/main_lrcview"
-        android:layout_width="match_parent"
+        android:layout_width="60dp"
         android:layout_height="0dp"
         android:layout_weight="1" />
 

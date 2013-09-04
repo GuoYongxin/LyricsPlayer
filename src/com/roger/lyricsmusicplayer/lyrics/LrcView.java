@@ -13,8 +13,13 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.TranslateAnimation;
+import android.widget.TextView;
 
-public class LrcView extends View {
+import com.roger.lyricsmusicplayer.lyrics.iterfa.ILrcDisplay;
+import com.roger.lyricsmusicplayer.lyrics.iterfa.ISeekalble;
+import com.roger.lyricsmusicplayer.lyrics.iterfa.Range;
+
+public class LrcView extends View implements ISeekalble, ILrcDisplay {
 
 	private static final String TAG = "LrcView";
 	private ArrayList<LrcRow> mLrcAll;
@@ -24,71 +29,86 @@ public class LrcView extends View {
 	private int mPaddingY = 10;
 	private int mHighLightColor = Color.YELLOW;
 	private int mNormalColor = Color.BLACK;
-
-	private final String NO_LRC = "No Lrc right row";
+	private int maxCharPerRow;
+	private final String NO_LRC_TIPS = "No Lrc right row";
+	private final String DOWNLOAD_FAILED_TIPS = "Lrc download failed";
+	private String mDisplay_Tips;
+	private int mHeight;
+	private int mWidth;
+	private int rowX;
 	public LrcView(Context context, AttributeSet attr) {
 		super(context, attr);
 		mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		mPaint.setTextSize(mFontSize);
+		mDisplay_Tips = NO_LRC_TIPS;
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		int height = getHeight();
-		int width = getWidth();
+		maxCharPerRow = getParentWidth() / getFontSize();
+		Log.v(TAG, "MAX CHARS:" + maxCharPerRow);
 
-		final int rowX = width / 2;
+		mHeight = getHeight();
+		mWidth = getWidth();
+
+		rowX = mWidth / 2;
 		int rowY;
 		int row;
 		if (mLrcAll == null || mLrcAll.size() == 0) {
 			Log.v(TAG, "noLrc");
-			int y = height / 2 - mFontSize;
-			mPaint.setTextAlign(Align.CENTER);
-			mPaint.setColor(mHighLightColor);
-			canvas.drawText(NO_LRC, rowX, y, mPaint);
+			displayTips(canvas);
 			return;
 
 		}
 
 		// draw highlight row
-		int highlightRowY = height / 2 - mFontSize;
-		String highlightText = mLrcAll.get(mCurrentRow).content;
+		int highlightRowY = mHeight / 2 - mFontSize;
+		LrcRow currentRow;
+		currentRow = mLrcAll.get(mCurrentRow);
 		mPaint.setTextAlign(Align.CENTER);
 		mPaint.setColor(mHighLightColor);
-		canvas.drawText(highlightText, rowX, highlightRowY, mPaint);
+		displayLrcRow(currentRow, canvas, mPaint, highlightRowY, Direction.DOWN);
 
 		// draw before
 		row = mCurrentRow - 1;
-		rowY = highlightRowY - mPaddingY - mFontSize;
+		rowY = currentRow.getRange().upBound;// - mPaddingY - mFontSize;
 		mPaint.setColor(mNormalColor);
 		while (row >= 0 && rowY > -mFontSize) {
-			String text = mLrcAll.get(row).content;
-			canvas.drawText(text, rowX, rowY, mPaint);
+			LrcRow rowTodraw = mLrcAll.get(row);
+			displayLrcRow(rowTodraw, canvas, mPaint, rowY, Direction.UP);
 			row--;
-			rowY -= (mPaddingY + mFontSize);
+			rowY = rowTodraw.getRange().upBound - (mPaddingY + mFontSize);
 		}
 
 		// draw after
 		row = mCurrentRow + 1;
-		rowY = highlightRowY + mPaddingY + mFontSize;
-		while (row < mLrcAll.size() && rowY < height) {
-			String text = mLrcAll.get(row).content;
-			canvas.drawText(text, rowX, rowY, mPaint);
+		rowY = currentRow.getRange().lowBound;// + mPaddingY + mFontSize;
+		while (row < mLrcAll.size() && rowY < mHeight) {
+			LrcRow rowTodraw = mLrcAll.get(row);
+			displayLrcRow(rowTodraw, canvas, mPaint, rowY, Direction.DOWN);
 			row++;
-			rowY += (mPaddingY + mFontSize);
+			rowY = rowTodraw.getRange().lowBound + (mPaddingY + mFontSize);
 		}
 		super.onDraw(canvas);
 	}
 
-	private  void seekToRow(int pos) {
+	private void displayTips(Canvas canvas) {
+		int y = mHeight / 2 - mFontSize;
+		mPaint.setTextAlign(Align.CENTER);
+		mPaint.setColor(mHighLightColor);
+		canvas.drawText(mDisplay_Tips, rowX, y, mPaint);
+	}
+
+	private void seekToRow(int pos) {
 		if (pos == mCurrentRow)
 			return;
 		mCurrentRow = pos;
 		Log.v(TAG, "Seek To Row:" + pos);
-		// invalidate();
+//		 invalidate();
 		startAnimation();
 	}
 
+	@Override
 	public void seekToTime(long milliSec) {
 		if (mLrcAll == null || mLrcAll.size() == 0)
 			return;
@@ -106,14 +126,15 @@ public class LrcView extends View {
 		if (mLrcAll.get(low).time != milliSec && low != 0) {
 			low = low - 1;
 		}
-		// Log.v(TAG, "Seek To time:" + milliSec);
 		seekToRow(low);
 	}
 
 	private void startAnimation() {
-		TranslateAnimation ta = new TranslateAnimation(0, 0, 0, 0 - mPaddingY
-				- mFontSize);
-		long currentTime = mLrcAll.get(mCurrentRow).time;
+
+		LrcRow row = mLrcAll.get(mCurrentRow);
+		long currentTime = row.time;
+		TranslateAnimation ta = new TranslateAnimation(0, 0, 0, 0
+				- row.getRange().lines * (mPaddingY + mFontSize));
 		int nextRow = mCurrentRow == mLrcAll.size() - 1
 				? mCurrentRow
 				: mCurrentRow + 1;
@@ -139,11 +160,77 @@ public class LrcView extends View {
 		});
 		this.startAnimation(ta);
 	}
+
 	public ArrayList<LrcRow> getLrcAll() {
 		return mLrcAll;
 	}
 
 	public void setLrcAll(ArrayList<LrcRow> mLrcAll) {
 		this.mLrcAll = mLrcAll;
+	}
+
+	@Override
+	public int getFontSize() {
+		return mFontSize;
+	}
+
+	@Override
+	public int getParentWidth() {
+		return getWidth();
+	}
+
+	@Override
+	public void displayLrcRow(LrcRow row, Canvas canvas, Paint paint,
+			int yCurrent, Direction direction) {
+		if (row == null || row.content == null)
+			return;
+		Log.v(TAG, "Begine draw row");
+		int charNum = row.content.length();
+		double linesCount = Math.ceil(Double.valueOf(charNum) / maxCharPerRow);
+		Log.v(TAG, "lines:" + linesCount);
+		Log.v(TAG, "charNum:" + charNum);
+		int lines = (int) linesCount;
+		int y = yCurrent;
+		Range range = new Range();
+		range.lines = lines;
+		if (direction == Direction.UP) {
+			y -= lines * (getFontSize() + mPaddingY);
+			range.upBound = y;
+			range.lowBound = yCurrent;
+		} else {
+			y += lines * (getFontSize() + mPaddingY);
+			range.upBound = yCurrent;
+			range.lowBound = y;
+		}
+		if(direction==Direction.DOWN)
+		{
+			y=yCurrent;
+		}
+		int indexFrom = 0;
+		int indexTo;
+
+		while (lines > 0 && charNum > 0) {
+			if (lines > 1) {
+				indexTo = indexFrom + maxCharPerRow;
+			} else {
+				indexTo = charNum;
+			}
+			Log.v(TAG, "from:" + indexFrom);
+			Log.v(TAG, "to:" + indexTo);
+			if (indexFrom > charNum - 1 || indexTo > charNum|| indexTo < 0
+					|| indexFrom < 0) {
+				Log.e(TAG, "index out of bound break");
+				break;
+			}
+			Log.v(TAG, "draw Text:" + row.content.substring(indexFrom, indexTo));
+			canvas.drawText(row.content.substring(indexFrom, indexTo), rowX, y,
+					mPaint);
+			y += getFontSize() + mPaddingY;
+			indexFrom = indexTo;
+			lines--;
+		}
+		row.setRange(range);
+
+		return;
 	}
 }
