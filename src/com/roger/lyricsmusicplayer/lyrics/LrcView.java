@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.TranslateAnimation;
-import android.widget.TextView;
 
 import com.roger.lyricsmusicplayer.lyrics.iterfa.ILrcDisplay;
 import com.roger.lyricsmusicplayer.lyrics.iterfa.ISeekalble;
@@ -71,23 +70,23 @@ public class LrcView extends View implements ISeekalble, ILrcDisplay {
 
 		// draw before
 		row = mCurrentRow - 1;
-		rowY = currentRow.getRange().upBound;// - mPaddingY - mFontSize;
+		rowY = currentRow.getRange().upBound;
 		mPaint.setColor(mNormalColor);
 		while (row >= 0 && rowY > -mFontSize) {
 			LrcRow rowTodraw = mLrcAll.get(row);
 			displayLrcRow(rowTodraw, canvas, mPaint, rowY, Direction.UP);
 			row--;
-			rowY = rowTodraw.getRange().upBound - (mPaddingY + mFontSize);
+			rowY = rowTodraw.getRange().upBound;
 		}
 
 		// draw after
 		row = mCurrentRow + 1;
-		rowY = currentRow.getRange().lowBound;// + mPaddingY + mFontSize;
+		rowY = currentRow.getRange().lowBound;
 		while (row < mLrcAll.size() && rowY < mHeight) {
 			LrcRow rowTodraw = mLrcAll.get(row);
 			displayLrcRow(rowTodraw, canvas, mPaint, rowY, Direction.DOWN);
 			row++;
-			rowY = rowTodraw.getRange().lowBound + (mPaddingY + mFontSize);
+			rowY = rowTodraw.getRange().lowBound;
 		}
 		super.onDraw(canvas);
 	}
