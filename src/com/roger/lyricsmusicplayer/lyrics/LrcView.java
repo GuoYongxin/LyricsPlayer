@@ -1,6 +1,7 @@
 package com.roger.lyricsmusicplayer.lyrics;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -103,7 +104,7 @@ public class LrcView extends View implements ISeekalble, ILrcDisplay {
 			return;
 		mCurrentRow = pos;
 		Log.v(TAG, "Seek To Row:" + pos);
-//		 invalidate();
+		// invalidate();
 		startAnimation();
 	}
 
@@ -178,17 +179,90 @@ public class LrcView extends View implements ISeekalble, ILrcDisplay {
 		return getWidth();
 	}
 
+	// @Override
+	// public void displayLrcRow(LrcRow row, Canvas canvas, Paint paint,
+	// int yCurrent, Direction direction) {
+	// if (row == null || row.content == null)
+	// return;
+	// Log.v(TAG, "Begine draw row");
+	// int charNum = row.content.length();
+	// double linesCount = Math.ceil(Double.valueOf(charNum) / maxCharPerRow);
+	// Log.v(TAG, "lines:" + linesCount);
+	// Log.v(TAG, "charNum:" + charNum);
+	// int lines = (int) linesCount;
+	// int y = yCurrent;
+	// Range range = new Range();
+	// range.lines = lines;
+	// if (direction == Direction.UP) {
+	// y -= lines * (getFontSize() + mPaddingY);
+	// range.upBound = y;
+	// range.lowBound = yCurrent;
+	// } else {
+	// y += lines * (getFontSize() + mPaddingY);
+	// range.upBound = yCurrent;
+	// range.lowBound = y;
+	// }
+	// if (direction == Direction.DOWN) {
+	// y = yCurrent;
+	// }
+	// int indexFrom = 0;
+	// int indexTo;
+	//
+	// while (lines > 0 && charNum > 0) {
+	// if (lines > 1) {
+	// indexTo = indexFrom + maxCharPerRow;
+	// } else {
+	// indexTo = charNum;
+	// }
+	// Log.v(TAG, "from:" + indexFrom);
+	// Log.v(TAG, "to:" + indexTo);
+	// if (indexFrom > charNum - 1 || indexTo > charNum || indexTo < 0
+	// || indexFrom < 0) {
+	// Log.e(TAG, "index out of bound break");
+	// break;
+	// }
+	// Log.v(TAG, "draw Text:" + row.content.substring(indexFrom, indexTo));
+	// canvas.drawText(row.content.substring(indexFrom, indexTo), rowX, y,
+	// mPaint);
+	// y += getFontSize() + mPaddingY;
+	// indexFrom = indexTo;
+	// lines--;
+	// }
+	// row.setRange(range);
+	//
+	// return;
+	// }
 	@Override
 	public void displayLrcRow(LrcRow row, Canvas canvas, Paint paint,
 			int yCurrent, Direction direction) {
 		if (row == null || row.content == null)
 			return;
 		Log.v(TAG, "Begine draw row");
-		int charNum = row.content.length();
-		double linesCount = Math.ceil(Double.valueOf(charNum) / maxCharPerRow);
-		Log.v(TAG, "lines:" + linesCount);
-		Log.v(TAG, "charNum:" + charNum);
-		int lines = (int) linesCount;
+		float enCharWidth = paint.getTextSize() / 2;
+		int width = getWidth();
+		String content = row.content;
+		int length = 0;
+		int size = 0;
+		int indexFrom = 0;
+		List<String> strings = new ArrayList<String>();
+		for (int i = 0; i < content.length(); i++) {
+			char ch = content.charAt(i);
+			size = isChinese(ch) ? 2 : 1;
+			if (length + enCharWidth * 4 > width) {
+				String str = content.substring(indexFrom, i);
+				indexFrom = i;
+				length = 0;
+				strings.add(str);
+			}
+			length += size * enCharWidth;
+			if (i == content.length() - 1) {
+				String str = content.substring(indexFrom);
+				strings.add(str);
+			}
+		}
+
+		Log.v(TAG, "lines:" + strings.size());
+		int lines = strings.size();
 		int y = yCurrent;
 		Range range = new Range();
 		range.lines = lines;
@@ -201,35 +275,27 @@ public class LrcView extends View implements ISeekalble, ILrcDisplay {
 			range.upBound = yCurrent;
 			range.lowBound = y;
 		}
-		if(direction==Direction.DOWN)
-		{
-			y=yCurrent;
+		if (direction == Direction.DOWN) {
+			y = yCurrent;
 		}
-		int indexFrom = 0;
-		int indexTo;
 
-		while (lines > 0 && charNum > 0) {
-			if (lines > 1) {
-				indexTo = indexFrom + maxCharPerRow;
-			} else {
-				indexTo = charNum;
-			}
-			Log.v(TAG, "from:" + indexFrom);
-			Log.v(TAG, "to:" + indexTo);
-			if (indexFrom > charNum - 1 || indexTo > charNum|| indexTo < 0
-					|| indexFrom < 0) {
-				Log.e(TAG, "index out of bound break");
-				break;
-			}
-			Log.v(TAG, "draw Text:" + row.content.substring(indexFrom, indexTo));
-			canvas.drawText(row.content.substring(indexFrom, indexTo), rowX, y,
-					mPaint);
+		for (int i = 0; i < lines; i++) {
+			canvas.drawText(strings.get(i), rowX, y, mPaint);
 			y += getFontSize() + mPaddingY;
-			indexFrom = indexTo;
-			lines--;
+
 		}
+		// while (lines > 0) {
+		// canvas.drawText(strings.get(lines-1), rowX, y, mPaint);
+		// y += getFontSize() + mPaddingY;
+		// lines--;
+		// }
 		row.setRange(range);
 
 		return;
 	}
+	public boolean isChinese(char a) {
+		int v = (int) a;
+		return (v >= 19968 && v <= 171941);
+	}
+
 }

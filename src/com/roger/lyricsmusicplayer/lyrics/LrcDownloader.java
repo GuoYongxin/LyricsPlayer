@@ -11,6 +11,7 @@ import java.net.URL;
 import org.apache.http.client.methods.HttpGet;
 
 import android.os.Handler;
+import android.util.Log;
 
 public class LrcDownloader {
 
@@ -43,6 +44,7 @@ public class LrcDownloader {
 				builder.append(line + "\n");
 			}
 			final String content = builder.toString();
+			Log.v(requestURL, content);
 			if (content != null && content.length() > 0) {
 				if (mHandler != null) {
 					mHandler.post(new Runnable() {
@@ -72,7 +74,7 @@ public class LrcDownloader {
 			} else {
 				hook.onFail(e);
 			}
-		} 
+		}
 	}
 
 	public interface LrcDownloaderHook {

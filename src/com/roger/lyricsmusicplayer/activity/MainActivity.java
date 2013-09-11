@@ -22,9 +22,9 @@ import android.widget.TextView;
 import com.roger.lyricsmusicplayer.lyrics.DefaultLrcBuilder;
 import com.roger.lyricsmusicplayer.lyrics.LrcDownloader;
 import com.roger.lyricsmusicplayer.lyrics.LrcDownloader.LrcDownloaderHook;
-import com.roger.lyricsmusicplayer.lyrics.iterfa.ILrcBuilder;
 import com.roger.lyricsmusicplayer.lyrics.LrcRow;
 import com.roger.lyricsmusicplayer.lyrics.LrcView;
+import com.roger.lyricsmusicplayer.lyrics.iterfa.ILrcBuilder;
 import com.sony.lyricsmusicplayer.R;
 
 public class MainActivity extends Activity
@@ -85,10 +85,7 @@ public class MainActivity extends Activity
 		mPlayer.setOnPreparedListener(this);
 		mController = new MediaController(this);
 		try {
-			String path = "http://zhangmenshiting.baidu.com/data2/music/35510639/1055422913320024.mp3?xcode=9a93517bc1237a7383725d738a5cb951a9a6b9374078f988";
-			// mPlayer.setDataSource(getAssets().openFd(FILE + ".mp3")
-			// .getFileDescriptor());
-			// path = "http://mod.cri.cn/eng/features/pik/2013/08/0807pik.mp3";
+			String path = "http://mod.cri.cn/eng/features/pik/2013/08/0807pik.mp3";
 			mPlayer.setDataSource(path.trim());
 
 		} catch (Exception e) {
@@ -106,7 +103,6 @@ public class MainActivity extends Activity
 	}
 
 	private void initLyrics() {
-		// String lrc = getFromAssets(FILE + ".lrc");
 		String url = "http://music.baidu.com/data2/lrc/23362117/23362117.lrc";
 		final LrcDownloader dl = new LrcDownloader(url,
 				new LrcDownloaderHook() {
@@ -124,6 +120,7 @@ public class MainActivity extends Activity
 
 					}
 				}, handler);
+
 		new Thread() {
 
 			@Override
