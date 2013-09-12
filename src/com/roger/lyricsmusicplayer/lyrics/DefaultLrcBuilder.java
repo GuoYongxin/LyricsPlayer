@@ -11,9 +11,9 @@ import android.util.Log;
 import com.roger.lyricsmusicplayer.lyrics.iterfa.ILrcBuilder;
 
 public class DefaultLrcBuilder implements ILrcBuilder {
-	
+
 	static final String TAG = "DefaultLrcBuilder";
-	
+
 	public ArrayList<LrcRow> getLrcRows(String rawLrc) {
 		Log.d(TAG, "getLrcRows by rawString");
 		if (rawLrc == null || rawLrc.length() == 0) {
@@ -28,9 +28,9 @@ public class DefaultLrcBuilder implements ILrcBuilder {
 			do {
 				line = br.readLine();
 				if (line != null && line.length() > 0) {
-					LrcRow lrcRow = LrcRowCreator.createRows(line);
-					if (lrcRow != null) {
-						allRows.add(lrcRow);
+					ArrayList<LrcRow> rows = LrcRowCreator.createRows(line);
+					if (rows != null) {
+						allRows.addAll(rows);
 					}
 				}
 			} while (line != null);

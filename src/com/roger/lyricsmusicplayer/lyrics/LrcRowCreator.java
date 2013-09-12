@@ -1,29 +1,29 @@
 package com.roger.lyricsmusicplayer.lyrics;
 
+import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import android.util.Log;
 
 public class LrcRowCreator {
 
 	private static final String TAG = LrcRowCreator.class.getSimpleName();
 
-	public static LrcRow createRows(String rawLine) {
-		Pattern pt = Pattern.compile("\\d{2}:\\d{2}.\\d{2}");
+	public static ArrayList<LrcRow> createRows(String rawLine) {
+		Pattern pt = Pattern.compile("\\d+:\\d+(\\.?\\d*)?");
 		Matcher matcher = pt.matcher(rawLine);
+		 ArrayList<LrcRow> rowsAll = new ArrayList<LrcRow>();
 		try {
-			if (matcher.find()) {
+			while (matcher.find()) {
 				String time = matcher.group();
-				int end = matcher.end();
-				String content = rawLine.substring(end + 1);
+				int last = rawLine.lastIndexOf(']');
+				String content = rawLine.substring(last + 1);
 				LrcRow row = new LrcRow(time, timeConvert(time), content);
-				return row;
+				rowsAll.add(row);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return null;
+		return rowsAll;
 	}
 
 	private static long timeConvert(String timeString) {

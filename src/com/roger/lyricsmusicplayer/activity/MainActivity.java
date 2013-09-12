@@ -103,7 +103,7 @@ public class MainActivity extends Activity
 	}
 
 	private void initLyrics() {
-		String url = "http://music.baidu.com/data2/lrc/23362117/23362117.lrc";
+		String url = "http://music.baidu.com/data2/lrc/72084890/72084890.lrc";
 		final LrcDownloader dl = new LrcDownloader(url,
 				new LrcDownloaderHook() {
 
