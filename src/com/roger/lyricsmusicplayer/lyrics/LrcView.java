@@ -73,7 +73,7 @@ public class LrcView extends View implements ISeekalble, ILrcDisplay {
 		row = mCurrentRow - 1;
 		rowY = currentRow.getRange().upBound;
 		mPaint.setColor(mNormalColor);
-		while (row >= 0 && rowY > -mFontSize) {
+		while (row >= 0 && rowY > -3 * mFontSize) {
 			LrcRow rowTodraw = mLrcAll.get(row);
 			displayLrcRow(rowTodraw, canvas, mPaint, rowY, Direction.UP);
 			row--;
@@ -83,7 +83,7 @@ public class LrcView extends View implements ISeekalble, ILrcDisplay {
 		// draw after
 		row = mCurrentRow + 1;
 		rowY = currentRow.getRange().lowBound;
-		while (row < mLrcAll.size() && rowY < mHeight) {
+		while (row < mLrcAll.size() && rowY < 3 * mHeight) {
 			LrcRow rowTodraw = mLrcAll.get(row);
 			displayLrcRow(rowTodraw, canvas, mPaint, rowY, Direction.DOWN);
 			row++;
@@ -179,59 +179,6 @@ public class LrcView extends View implements ISeekalble, ILrcDisplay {
 		return getWidth();
 	}
 
-	// @Override
-	// public void displayLrcRow(LrcRow row, Canvas canvas, Paint paint,
-	// int yCurrent, Direction direction) {
-	// if (row == null || row.content == null)
-	// return;
-	// Log.v(TAG, "Begine draw row");
-	// int charNum = row.content.length();
-	// double linesCount = Math.ceil(Double.valueOf(charNum) / maxCharPerRow);
-	// Log.v(TAG, "lines:" + linesCount);
-	// Log.v(TAG, "charNum:" + charNum);
-	// int lines = (int) linesCount;
-	// int y = yCurrent;
-	// Range range = new Range();
-	// range.lines = lines;
-	// if (direction == Direction.UP) {
-	// y -= lines * (getFontSize() + mPaddingY);
-	// range.upBound = y;
-	// range.lowBound = yCurrent;
-	// } else {
-	// y += lines * (getFontSize() + mPaddingY);
-	// range.upBound = yCurrent;
-	// range.lowBound = y;
-	// }
-	// if (direction == Direction.DOWN) {
-	// y = yCurrent;
-	// }
-	// int indexFrom = 0;
-	// int indexTo;
-	//
-	// while (lines > 0 && charNum > 0) {
-	// if (lines > 1) {
-	// indexTo = indexFrom + maxCharPerRow;
-	// } else {
-	// indexTo = charNum;
-	// }
-	// Log.v(TAG, "from:" + indexFrom);
-	// Log.v(TAG, "to:" + indexTo);
-	// if (indexFrom > charNum - 1 || indexTo > charNum || indexTo < 0
-	// || indexFrom < 0) {
-	// Log.e(TAG, "index out of bound break");
-	// break;
-	// }
-	// Log.v(TAG, "draw Text:" + row.content.substring(indexFrom, indexTo));
-	// canvas.drawText(row.content.substring(indexFrom, indexTo), rowX, y,
-	// mPaint);
-	// y += getFontSize() + mPaddingY;
-	// indexFrom = indexTo;
-	// lines--;
-	// }
-	// row.setRange(range);
-	//
-	// return;
-	// }
 	@Override
 	public void displayLrcRow(LrcRow row, Canvas canvas, Paint paint,
 			int yCurrent, Direction direction) {
@@ -284,11 +231,6 @@ public class LrcView extends View implements ISeekalble, ILrcDisplay {
 			y += getFontSize() + mPaddingY;
 
 		}
-		// while (lines > 0) {
-		// canvas.drawText(strings.get(lines-1), rowX, y, mPaint);
-		// y += getFontSize() + mPaddingY;
-		// lines--;
-		// }
 		row.setRange(range);
 
 		return;

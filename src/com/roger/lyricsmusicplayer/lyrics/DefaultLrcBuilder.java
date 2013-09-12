@@ -5,14 +5,15 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
-
-import com.roger.lyricsmusicplayer.lyrics.iterfa.ILrcBuilder;
 
 import android.util.Log;
 
+import com.roger.lyricsmusicplayer.lyrics.iterfa.ILrcBuilder;
+
 public class DefaultLrcBuilder implements ILrcBuilder {
+	
 	static final String TAG = "DefaultLrcBuilder";
+	
 	public ArrayList<LrcRow> getLrcRows(String rawLrc) {
 		Log.d(TAG, "getLrcRows by rawString");
 		if (rawLrc == null || rawLrc.length() == 0) {
@@ -22,22 +23,19 @@ public class DefaultLrcBuilder implements ILrcBuilder {
 		StringReader reader = new StringReader(rawLrc);
 		BufferedReader br = new BufferedReader(reader);
 		String line = null;
-		ArrayList<LrcRow> rows = new ArrayList<LrcRow>();
+		ArrayList<LrcRow> allRows = new ArrayList<LrcRow>();
 		try {
 			do {
 				line = br.readLine();
 				if (line != null && line.length() > 0) {
-					List<LrcRow> lrcRows = LrcRowBuilder.createRows(line);
-					if (lrcRows != null && lrcRows.size() > 0) {
-						for (LrcRow row : lrcRows) {
-							rows.add(row);
-						}
+					LrcRow lrcRow = LrcRowCreator.createRows(line);
+					if (lrcRow != null) {
+						allRows.add(lrcRow);
 					}
 				}
-
 			} while (line != null);
-			if (rows.size() > 0) {
-				Collections.sort(rows);
+			if (allRows.size() > 0) {
+				Collections.sort(allRows);
 			}
 
 		} catch (Exception e) {
@@ -51,6 +49,6 @@ public class DefaultLrcBuilder implements ILrcBuilder {
 			}
 			reader.close();
 		}
-		return rows;
+		return allRows;
 	}
 }

@@ -1,11 +1,9 @@
 package com.roger.lyricsmusicplayer.lyrics;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.apache.http.client.methods.HttpGet;
@@ -32,7 +30,7 @@ public class LrcDownloader {
 			URL url = new URL(this.requestURL);
 			connection = (HttpURLConnection) url.openConnection();
 			connection.setRequestMethod(HttpGet.METHOD_NAME);
-			connection.setRequestProperty("User-Agent", "MyAnroidDevice");
+			connection.setRequestProperty("User-Agent", "Roger_Anroid_Device");
 			connection.setConnectTimeout(TIME_OUT);
 			connection.setReadTimeout(TIME_OUT);
 			connection.connect();
