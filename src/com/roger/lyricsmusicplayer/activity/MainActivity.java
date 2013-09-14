@@ -19,13 +19,13 @@ import android.widget.MediaController;
 import android.widget.MediaController.MediaPlayerControl;
 import android.widget.TextView;
 
+import com.roger.lyricsmusicplayer.R;
 import com.roger.lyricsmusicplayer.lyrics.DefaultLrcBuilder;
 import com.roger.lyricsmusicplayer.lyrics.LrcDownloader;
 import com.roger.lyricsmusicplayer.lyrics.LrcDownloader.LrcDownloaderHook;
 import com.roger.lyricsmusicplayer.lyrics.LrcRow;
 import com.roger.lyricsmusicplayer.lyrics.LrcView;
 import com.roger.lyricsmusicplayer.lyrics.iterfa.ILrcBuilder;
-import com.sony.lyricsmusicplayer.R;
 
 public class MainActivity extends Activity
 		implements
